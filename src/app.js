@@ -153,11 +153,10 @@ app.post('/status', async (req, res) => {
     }
     try {
         const result = await db.collection("participants").find({name: usuario}).toArray();
-        console.log(result);
-        if (!result){
+        let resultado = result;
+        if (resultado.length === 0){
             return res.sendStatus(404);
         }
-
         try{
             await db.collection("participants").updateOne({name: usuario}, {$set: {lastStatus: Date.now()}});
             res.sendStatus(200)
@@ -188,7 +187,7 @@ setInterval(async () => {
     } catch (err) {
         res.status(500).send(err.message);
     }
-}, 15000);
+}, 75000);
 
 
 app.listen(PORT, console.log(`Servidor rodando na porta ${PORT}`));
