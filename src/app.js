@@ -124,16 +124,16 @@ app.post('/messages', async (req, res) => {
 app.get('/messages', async (req, res) => {
 
     const user = req.headers.user;
-    const limit = parseInt(req.query.limit);
+    let limit = req.query.limit;
 
     if (limit !== undefined && (limit <= 0 || isNaN(limit))){
         return res.sendStatus(422);
     }
+    limit = parseInt(limit);
 
     try{
         const messages = await db.collection("messages").find({$or: [{type: "message"}, {to:"Todos"}, {to: user}, {from: user}]}).toArray();
         let mensagens = messages;
-        console.log(limit !== undefined);
         if(limit !== undefined){
             mensagens = messages.slice(-limit);
         }
