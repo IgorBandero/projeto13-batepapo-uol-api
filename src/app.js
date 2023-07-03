@@ -44,8 +44,7 @@ app.post('/participants', async (req, res) => {
 		lastStatus: Date.now()
     }
 
-    const dataHoje = dayjs();
-    const horaAtual = dataHoje.format('HH:mm:ss'); 
+    const horaAtual = dayjs().format('HH:mm:ss'); 
 
     const logMessage = { 
 		from: name,
@@ -77,7 +76,50 @@ app.get('/participants', async (req, res) => {
     catch(err){
         res.status(500).send(err.message);
     }
-})
+});
+
+app.post('/messages', async (req, res) => {
+
+    const { to, text, type } = req.body;
+    const user = req.headers.user;
+    console.log(user);
+
+    const userExist = await db.collection("participants").findOne({name: user});
+
+    if (!user || !userExist){
+        return res.sendStatus(422);
+    }
+
+    let horaAtual = dayjs().format('HH:mm:ss'); 
+
+    const newMessage = {
+        from: user,
+        to: to,
+        text: text,
+        type: type,
+        time: horaAtual
+    }
+    
+    const schemaMessage = Joi.object({
+        to: Joi.string().required().min(1),
+        text: Joi.string().required().min(1),
+        type: Joi.string().valid('message', 'private_message')
+    })
+    
+    const validation = schemaMessage.validate(req.body, {abortEarly: false})
+    
+    if (validation.error){
+        return res.sendStatus(422);
+    }
+
+    try {
+        await db.collection("messages").insertOne(newMessage)
+        res.sendStatus(201)
+    }
+    catch (err){
+        res.status(500).send(err.message)
+    }
+});
 
 app.listen(PORT, console.log(`Servidor rodando na porta ${PORT}`));
 
