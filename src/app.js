@@ -103,7 +103,7 @@ app.post('/messages', async (req, res) => {
     const schemaMessage = Joi.object({
         to: Joi.string().required().min(1),
         text: Joi.string().required().min(1),
-        type: Joi.string().valid('message', 'private_message')
+        type: Joi.string().required().valid('message', 'private_message')
     })
     
     const validation = schemaMessage.validate(req.body, {abortEarly: false})
@@ -120,6 +120,38 @@ app.post('/messages', async (req, res) => {
         res.status(500).send(err.message)
     }
 });
+
+app.get('/messages', async (req, res) => {
+
+    const user = req.headers.user;
+    const limit = parseInt(req.query.limit);
+    let limite;
+
+    if (limit <= 0 || (typeof limit === 'string' && isNaN(limit))){
+        return res.sendStatus(422);
+    }
+
+    try{
+        const messages = await db.collection("messages").find({$or: [
+            { type: "message" },
+            { to: "Todos" },
+            { to: user },
+            { from: user }
+        ]}).toArray();
+
+        if(limit){
+            messages = messages.slice(-limit);
+            console.log(messages);
+            return res.send(messages);
+        }
+        res.send(messages);
+    }
+    catch(err){
+        res.status(500).send(err.message);
+    }
+});
+
+
 
 app.listen(PORT, console.log(`Servidor rodando na porta ${PORT}`));
 
