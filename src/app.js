@@ -153,12 +153,13 @@ app.post('/status', async (req, res) => {
     }
     try {
         const result = await db.collection("participants").find({name: usuario}).toArray();
+        console.log(result);
         if (!result){
             return res.sendStatus(404);
         }
 
         try{
-            await db.collection("participants").updateOne({name: usuario}, {$set: {name: name, lastStatus: Date.now()}});
+            await db.collection("participants").updateOne({name: usuario}, {$set: {lastStatus: Date.now()}});
             res.sendStatus(200)
         }
         catch(err){
