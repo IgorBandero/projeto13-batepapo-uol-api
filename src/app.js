@@ -47,8 +47,6 @@ app.post('/participants', async (req, res) => {
     const dataHoje = dayjs();
     const horaAtual = dataHoje.format('HH:mm:ss'); 
 
-    console.log(newParticipant.lastStatus);
-
     const logMessage = { 
 		from: name,
 		to: 'Todos',
@@ -66,6 +64,20 @@ app.post('/participants', async (req, res) => {
         res.status(500).send(err.message)
     }
 });
+
+app.get('/participants', async (req, res) => {
+
+    try{
+        const participants = await db.collection("participants").find().toArray();
+        if(!participants){
+            return res.send([]);
+        }
+        res.send(participants);
+    }
+    catch(err){
+        res.status(500).send(err.message);
+    }
+})
 
 app.listen(PORT, console.log(`Servidor rodando na porta ${PORT}`));
 
