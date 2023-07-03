@@ -187,7 +187,7 @@ setInterval(async () => {
     } catch (err) {
         res.status(500).send(err.message);
     }
-}, 75000);
+}, 15000);
 
 
 app.listen(PORT, console.log(`Servidor rodando na porta ${PORT}`));
