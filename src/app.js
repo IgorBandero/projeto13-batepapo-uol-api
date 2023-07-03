@@ -173,21 +173,17 @@ app.post('/status', async (req, res) => {
 
 setInterval(async () => {
 
-    let tempoLimite = Date.now() - 10000;
     try {
-        const usersOffline = await db.collection('participants').find({lastStatus:{$lt: tempoLimite}}).toArray();
+        const usersOffline = await db.collection('participants').find({lastStatus:{$lt: (Date.now() - 10000)}}).toArray();
         if (usersOffline.length > 0) {
-            let mensagemSaida = usersOffline.map(user => {
-                return {
-                    from: user.name,
-                    to: 'Todos',
-                    text: 'sai da sala...',
-                    type: 'status',
-                    time: dayjs().format("HH:mm:ss")
-                }
+            let mensagemSaida = usersOffline.map(user => {return {from: user.name,
+                                                                    to: 'Todos',
+                                                                    text: 'sai da sala...',
+                                                                    type: 'status',
+                                                                    time: dayjs().format("HH:mm:ss")}
             });
             await db.collection('messages').insertMany(mensagemSaida);
-            await db.collection('participants').deleteMany({lastStatus:{$lt:tempoLimite}});
+            await db.collection('participants').deleteMany({lastStatus:{$lt:(Date.now() - 10000)}});
         }
     } catch (err) {
         res.status(500).send(err.message);
